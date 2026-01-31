@@ -1,0 +1,122 @@
+syntax = "proto3";
+
+package paxos.v1;
+
+option java_multiple_files = true;
+option java_package = "com.example.paxos.v1";
+option java_outer_classname = "PaxosProto";
+
+import "google/protobuf/empty.proto";
+
+// ---- Core model ----
+message Ballot { int64 epoch = 1; string leaderId = 2; }
+message Seq    { int64 num   = 1; }
+
+message Txn {
+  string from = 1;
+  string to = 2;
+  int32 amount = 3;
+  string clientId = 4;
+  int64 clientTs = 5;
+}
+
+message Noop {}
+
+message Value {
+  oneof kind {
+    Txn  txn  = 1;
+    Noop noop = 2;
+  }
+}
+
+message AcceptedEntry {
+  Ballot b = 1;
+  Seq s = 2;
+  Value value = 3;
+}
+
+// ---- Node ↔ Node RPC ----
+message PrepareReq { Ballot b = 1; }
+
+message PromiseRes {
+  Ballot b = 1;
+  repeated AcceptedEntry acceptLog = 2;
+}
+
+message AcceptReq { Ballot b = 1; Seq s = 2; Value value = 3; }
+
+message AcceptedReq {
+  Ballot b = 1;
+  Seq s = 2;
+  string fromNodeId = 3;
+}
+
+message CommitReq { Ballot b = 1; Seq s = 2; Value value = 3; }
+
+message NewViewReq {
+  Ballot b = 1;
+  repeated AcceptReq rebroadcastBatch = 2;
+}
+
+service PaxosNode {
+  rpc Prepare (PrepareReq)           returns (PromiseRes);
+  rpc Accept  (AcceptReq)            returns (google.protobuf.Empty);
+  rpc Accepted(AcceptedReq)          returns (google.protobuf.Empty);
+  rpc Commit  (CommitReq)            returns (google.protobuf.Empty);
+  rpc NewView (NewViewReq)           returns (google.protobuf.Empty);
+  rpc GetDB   (google.protobuf.Empty) returns (PrintDBResponse);
+  rpc GetStatus (PrintStatusRequest) returns (PrintStatusResponse);
+}
+
+// ---- Client ↔ Leader RPC ----
+message ClientRequest { Txn txn = 1; }
+
+message ClientReply {
+  Ballot b = 1;
+  string clientId = 2;
+  int64 clientTs = 3;
+  bool success = 4;
+  string message = 5;
+  Seq seq = 6;
+}
+
+service Bank {
+  rpc Submit     (ClientRequest)         returns (ClientReply);
+  rpc PrintDB    (google.protobuf.Empty) returns (PrintAllDBResponse);
+  rpc PrintLog   (PrintLogRequest)       returns (PrintLogResponse);
+  rpc PrintStatus(PrintStatusRequest)    returns (PrintAllStatusResponse);
+  rpc PrintView  (google.protobuf.Empty) returns (PrintViewResponse);
+  
+}
+
+message PrintLogRequest   { string nodeId = 1; }
+message PrintLogResponse  { repeated string log_entries = 1; }
+message PrintDBResponse   { map<string, int32> db = 1; }
+message PrintStatusRequest{ int64 seq = 1; }
+message PrintStatusResponse { map<string, string> status = 1; }
+message PrintViewResponse { repeated NewViewReq views = 1; }
+
+message PrintAllDBResponse {
+  map<string, PrintDBResponse> all_dbs = 1;
+}
+
+message PrintAllStatusResponse {
+  map<string, PrintStatusResponse> all_statuses = 1;
+}
+
+// ---- Admin service ----
+message SetStatusRequest {
+  string nodeId = 1;
+  string status = 2; //"UP", "DOWN", "SLOW"
+}
+
+message IsLeaderResponse { bool is_leader = 1; }
+
+service AdminService {
+  rpc SetNodeStatus (SetStatusRequest)    returns (google.protobuf.Empty);
+  rpc IsLeader      (google.protobuf.Empty) returns (IsLeaderResponse);
+  rpc FailLeader    (google.protobuf.Empty) returns (google.protobuf.Empty);
+
+  rpc StartTimers(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+  rpc StopTimers(google.protobuf.Empty) returns (google.protobuf.Empty) {}
+}
