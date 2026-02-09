@@ -1,6 +1,10 @@
-```markdown
 # Distributed Banking System (Paxos)
+
+A fault-tolerant distributed banking application...
+
 [![Spec](https://img.shields.io/badge/Project-Specification-red?logo=adobeacrobatreader&logoColor=white)](CSE535_F25_Project1.pdf)
+
+---
 
 A fault-tolerant distributed banking application built with **Java Spring Boot** and **gRPC**. This system implements the **Paxos Consensus Protocol** to ensure consistent transaction processing across a distributed cluster of nodes, handling node failures and concurrent client requests.
 
