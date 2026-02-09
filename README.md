@@ -133,6 +133,19 @@ Inside the Test Runner, you can use:
 
 ---
 
+## 🧪 Test Scenarios
+
+The project includes two comprehensive test suites located in the `tests/` directory. You can run these using the `TestRunner` CLI.
+
+### 1. Demo Tests (`CSE535-F25-Project-1-Demo-Tests.csv`)
+This file is designed for the project demonstration. It covers 4 distinct sets:
+* **Sets 1-2:** Basic transaction processing with varying active nodes.
+* **Sets 3-4:** Leader Failure (`LF`) scenarios to demonstrate the **Leader Election** algorithm.
+
+**Run Command:**
+```bash
+java -cp target/grpc-demo-0.0.1-SNAPSHOT.jar:target/lib/* com.example.paxos.TestRunner -f tests/CSE535-F25-Project-1-Demo-Tests.csv
+
 ## 📜 Project Structure
 
 ```bash
