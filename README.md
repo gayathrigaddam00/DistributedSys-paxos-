@@ -135,7 +135,7 @@ Inside the Test Runner, you can use:
 
 ## 🧪 Test Scenarios
 
-The project includes two comprehensive test suites located in the `tests/` directory. You can run these using the `TestRunner` CLI.
+The project includes two comprehensive test suites. You can run these using the `TestRunner` CLI.
 
 ### 1. Demo Tests (`CSE535-F25-Project-1-Demo-Tests.csv`)
 This file is designed for the project demonstration. It covers 4 distinct sets:
